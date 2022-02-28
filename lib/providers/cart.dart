@@ -52,4 +52,24 @@ class Cart with ChangeNotifier {
   int get itemCount {
     return _items.length;
   }
+
+  double get totalAmount {
+    double total = 0.0;
+    _items.forEach(
+      (key, CartItem) {
+        total += CartItem.price * CartItem.quantity;
+      },
+    );
+    return total;
+  }
+
+  void removeItem(String productId) {
+    _items.remove(productId);
+    notifyListeners();
+  }
+
+  void clearCart() {
+    _items = {};
+    notifyListeners();
+  }
 }
