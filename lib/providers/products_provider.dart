@@ -58,7 +58,8 @@ class Products with ChangeNotifier {
         'https://flutter-prac-db-default-rtdb.firebaseio.com/products.json');
     // final url = Uri.https('https://flutter-prac-db-default-rtdb.firebaseio.com', '/products.json');
 
-    http.post(
+    http
+        .post(
       url,
       body: jsonEncode({
         'title': product.title,
@@ -67,18 +68,21 @@ class Products with ChangeNotifier {
         'price': product.price,
         'isFavourite': product.isFavourite,
       }),
-    );
+    )
+        .then((response) {
+      print(json.decode(response.body));
+      final newProduct = Product(
+        id:json.decode(response.body)['name'],
+        title: product.title,
+        description: product.description,
+        price: product.price,
+        imageUrl: product.imageUrl,
+      );
 
-    final newProduct = Product(
-      id: DateTime.now().toString(),
-      title: product.title,
-      description: product.description,
-      price: product.price,
-      imageUrl: product.imageUrl,
-    );
+      _items.add(newProduct);
+      notifyListeners();
+    });
 
-    _items.add(newProduct);
-    notifyListeners();
     // _items.insert(0, newProduct);
   }
 
