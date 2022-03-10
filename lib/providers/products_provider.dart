@@ -53,26 +53,62 @@ class Products with ChangeNotifier {
     return _items.where((element) => element.isFavourite).toList();
   }
 
-  void addProduct(Product product) {
+  //>>>>>>>>>>>>using Future without async using .catcherror and .then
+  // Future<void> addProduct(Product product) {
+  //   final url = Uri.parse(
+  //       'https://flutter-prac-db-default-rtdb.firebaseio.com/products');
+  //   // final url = Uri.https('https://flutter-prac-db-default-rtdb.firebaseio.com', '/products.json');
+
+  //   return http
+  //       .post(
+  //     url,
+  //     body: jsonEncode({
+  //       'title': product.title,
+  //       'description': product.description,
+  //       'imageUrl': product.imageUrl,
+  //       'price': product.price,
+  //       'isFavourite': product.isFavourite,
+  //     }),
+  //   )
+  //       .then((response) {
+  //     print(json.decode(response.body));
+  //     final newProduct = Product(
+  //       id: json.decode(response.body)['name'],
+  //       title: product.title,
+  //       description: product.description,
+  //       price: product.price,
+  //       imageUrl: product.imageUrl,
+  //     );
+
+  //     _items.add(newProduct);
+  //     notifyListeners();
+  //   }).catchError((onError) {
+  //     print(onError);
+  //     throw onError;
+  //   });
+
+  //   // _items.insert(0, newProduct);
+  // }
+
+  //>>>>>>>>>>>>using Future with async and await
+  Future<void> addProduct(Product product) async {
     final url = Uri.parse(
         'https://flutter-prac-db-default-rtdb.firebaseio.com/products.json');
     // final url = Uri.https('https://flutter-prac-db-default-rtdb.firebaseio.com', '/products.json');
 
-    http
-        .post(
-      url,
-      body: jsonEncode({
-        'title': product.title,
-        'description': product.description,
-        'imageUrl': product.imageUrl,
-        'price': product.price,
-        'isFavourite': product.isFavourite,
-      }),
-    )
-        .then((response) {
-      print(json.decode(response.body));
+    try {
+      final response = await http.post(
+        url,
+        body: jsonEncode({
+          'title': product.title,
+          'description': product.description,
+          'imageUrl': product.imageUrl,
+          'price': product.price,
+          'isFavourite': product.isFavourite,
+        }),
+      );
       final newProduct = Product(
-        id:json.decode(response.body)['name'],
+        id: json.decode(response.body)['name'],
         title: product.title,
         description: product.description,
         price: product.price,
@@ -81,7 +117,10 @@ class Products with ChangeNotifier {
 
       _items.add(newProduct);
       notifyListeners();
-    });
+    } catch (onError) {
+      print(onError);
+      throw onError;
+    }
 
     // _items.insert(0, newProduct);
   }
