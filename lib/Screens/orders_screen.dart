@@ -42,6 +42,8 @@ class _OrderScreenState extends State<OrderScreen> {
     }); */
 
 // ************* we are using Future builder here in the body parameter below**************
+// ************* using this we can easily change back to stateless widget, we dont even need _isLoading
+// we need to comment out the provider and use consumer otherwise it would enter infinite loop and crash
 
     super.initState();
   }
