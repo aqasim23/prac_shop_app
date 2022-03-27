@@ -43,8 +43,9 @@ class Products with ChangeNotifier {
   ];
 
   final String authToken;
+  final String userId;
 
-  Products(this.authToken, this._items);
+  Products(this.authToken, this.userId, this._items);
 
   List<Product> get items {
     return [..._items];
@@ -59,7 +60,7 @@ class Products with ChangeNotifier {
   }
 
   Future<void> fetchAndSetProducts() async {
-    final url = Uri.parse(
+    var url = Uri.parse(
         'https://flutter-prac-db-default-rtdb.firebaseio.com/products.json?auth=$authToken');
     try {
       final response = await http.get(url);
@@ -68,6 +69,10 @@ class Products with ChangeNotifier {
       if (extractedData == null) {
         return;
       }
+      url = Uri.parse(
+        'https://flutter-prac-db-default-rtdb.firebaseio.com/userFavorites/$userId.json?auth=$authToken');
+      final favoriteResponse = await http.get(url);
+      final favoriteData = jsonDecode(favoriteResponse.body);
       extractedData.forEach((prodId, prodData) {
         loadedProducts.add(
           Product(
@@ -75,7 +80,7 @@ class Products with ChangeNotifier {
             title: prodData['title'],
             description: prodData['description'],
             price: prodData['price'],
-            isFavourite: prodData['isFavourite'],
+            isFavourite: favoriteData == null ? false : favoriteData[prodId] ?? false,
             imageUrl: prodData['imageUrl'],
           ),
         );
@@ -127,7 +132,7 @@ class Products with ChangeNotifier {
   //>>>>>>>>>>>>using Future with async and await
   Future<void> addProduct(Product product) async {
     final url = Uri.parse(
-        'https://flutter-prac-db-default-rtdb.firebaseio.com/products.json');
+        'https://flutter-prac-db-default-rtdb.firebaseio.com/products.json?auth=$authToken');
     // final url = Uri.https('https://flutter-prac-db-default-rtdb.firebaseio.com', '/products.json');
 
     try {
@@ -138,7 +143,6 @@ class Products with ChangeNotifier {
           'description': product.description,
           'imageUrl': product.imageUrl,
           'price': product.price,
-          'isFavourite': product.isFavourite,
         }),
       );
       final newProduct = Product(
@@ -163,7 +167,7 @@ class Products with ChangeNotifier {
     final prodIndex = _items.indexWhere((prod) => prod.id == id);
     if (prodIndex >= 0) {
       final url = Uri.parse(
-          'https://flutter-prac-db-default-rtdb.firebaseio.com/products/$id.json');
+          'https://flutter-prac-db-default-rtdb.firebaseio.com/products/$id.json?auth=$authToken');
       await http.patch(url,
           body: json.encode({
             'title': newProduct.title,
@@ -182,7 +186,7 @@ class Products with ChangeNotifier {
 
   Future<void> deleteProduct(String id) async {
     final url = Uri.parse(
-        'https://flutter-prac-db-default-rtdb.firebaseio.com/products/$id.json');
+        'https://flutter-prac-db-default-rtdb.firebaseio.com/products/$id.json?auth=$authToken');
     final existingProductIndex =
         _items.indexWhere((element) => element.id == id);
     var existingProduct = _items[existingProductIndex];

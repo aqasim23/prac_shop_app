@@ -21,6 +21,10 @@ class Auth with ChangeNotifier {
     return null;
   }
 
+  String get userId {
+    return _userId;
+  }
+
   Future<void> _authenticate(String email, String password, Uri url) async {
     try {
       final response = await http.post(
@@ -40,7 +44,7 @@ class Auth with ChangeNotifier {
           responseData['error']['message'],
         );
       }
-      print(responseData);
+      //print(responseData);
       _token = responseData['idToken'];
       _userId = responseData['localId'];
       _expiryDate = DateTime.now().add(
