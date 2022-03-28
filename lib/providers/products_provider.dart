@@ -59,9 +59,18 @@ class Products with ChangeNotifier {
     return _items.where((element) => element.isFavourite).toList();
   }
 
-  Future<void> fetchAndSetProducts() async {
-    var url = Uri.parse(
-        'https://flutter-prac-db-default-rtdb.firebaseio.com/products.json?auth=$authToken');
+  Future<void> fetchAndSetProducts([bool filterByUser = false]) async {
+    //var url = Uri.parse(
+    //    'https://flutter-prac-db-default-rtdb.firebaseio.com/products.json?auth=$authToken&orderBy"creatorId"&equalTo"$userId"');
+    var params = filterByUser ? {
+      'auth': authToken,
+      'orderBy': '"creatorId"',
+      'equalTo': '"$userId"',
+    } : {
+      'auth': authToken,
+    };
+    var url = Uri.https('flutter-prac-db-default-rtdb.firebaseio.com',
+        '/products.json', params);
     try {
       final response = await http.get(url);
       final extractedData = json.decode(response.body) as Map<String, dynamic>;
@@ -69,8 +78,9 @@ class Products with ChangeNotifier {
       if (extractedData == null) {
         return;
       }
+
       url = Uri.parse(
-        'https://flutter-prac-db-default-rtdb.firebaseio.com/userFavorites/$userId.json?auth=$authToken');
+          'https://flutter-prac-db-default-rtdb.firebaseio.com/userFavorites/$userId.json?auth=$authToken');
       final favoriteResponse = await http.get(url);
       final favoriteData = jsonDecode(favoriteResponse.body);
       extractedData.forEach((prodId, prodData) {
@@ -80,7 +90,8 @@ class Products with ChangeNotifier {
             title: prodData['title'],
             description: prodData['description'],
             price: prodData['price'],
-            isFavourite: favoriteData == null ? false : favoriteData[prodId] ?? false,
+            isFavourite:
+                favoriteData == null ? false : favoriteData[prodId] ?? false,
             imageUrl: prodData['imageUrl'],
           ),
         );
@@ -143,6 +154,7 @@ class Products with ChangeNotifier {
           'description': product.description,
           'imageUrl': product.imageUrl,
           'price': product.price,
+          'creatorId': userId,
         }),
       );
       final newProduct = Product(
