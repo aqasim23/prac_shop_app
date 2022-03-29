@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../Screens/splash_screen.dart';
 import '../providers/auth.dart';
 import '../Screens/cart_screen.dart';
 import '../Screens/orders_screen.dart';
@@ -25,8 +26,10 @@ class MyApp extends StatelessWidget {
             create: (ctx) => Auth(),
           ),
           ChangeNotifierProxyProvider<Auth, Orders>(
-            create: (_) => Orders('', []),
-            update: (ctx, auth, previousOrders) => Orders(auth.token,
+            create: (_) => Orders('', '', []),
+            update: (ctx, auth, previousOrders) => Orders(
+                auth.token,
+                auth.userId,
                 previousOrders == null ? [] : previousOrders.orders),
           ),
           // ChangeNotifierProvider(
@@ -54,7 +57,16 @@ class MyApp extends StatelessWidget {
               fontFamily: 'Lato',
             ),
             //home: productsOverScreen(),
-            home: auth.isAuth ? productsOverScreen() : AuthScreen(),
+            home: auth.isAuth
+                ? productsOverScreen()
+                : FutureBuilder(
+                    builder: (ctx, authResultSnapshot) =>
+                        authResultSnapshot.connectionState ==
+                                ConnectionState.waiting
+                            ? SplashScreen()
+                            : AuthScreen(),
+                    future: auth.tryAutoLogin(),
+                  ),
             routes: {
               productDetailsScreen.routeName: (ctx) => productDetailsScreen(),
               cartScreen.routeName: (ctx) => cartScreen(),
